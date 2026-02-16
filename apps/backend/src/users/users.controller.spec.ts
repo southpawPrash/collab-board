@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './user.entity';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -11,6 +13,10 @@ describe('UsersController', () => {
     findAll: jest.fn().mockResolvedValue([mockUser]),
     findOne: jest.fn().mockResolvedValue(mockUser),
     create: jest.fn().mockResolvedValue(mockUser),
+    update: jest.fn((id: number, fields: UpdateUserDto): User => {
+      return { ...mockUser, ...fields };
+    }),
+    remove: jest.fn().mockResolvedValue(mockUser),
   };
 
   beforeEach(async () => {
@@ -37,7 +43,7 @@ describe('UsersController', () => {
   });
 
   it('findOne should return a single user', async () => {
-    expect(await controller.findOne('1')).toEqual(mockUser);
+    expect(await controller.findOne(1)).toEqual(mockUser);
     expect(mockService.findOne).toHaveBeenCalledWith(1);
   });
 
@@ -45,6 +51,25 @@ describe('UsersController', () => {
     expect(
       await controller.create({ name: 'Alice', email: 'alice@test.com' }),
     ).toEqual(mockUser);
-    expect(mockService.create).toHaveBeenCalledWith('Alice', 'alice@test.com');
+    expect(mockService.create).toHaveBeenCalledWith({
+      name: 'Alice',
+      email: 'alice@test.com',
+    });
+  });
+
+  it('update should return the updated user', async () => {
+    expect(
+      await controller.update(1, { name: 'Alan', email: 'alan@test.com' }),
+    ).toEqual({ id: 1, name: 'Alan', email: 'alan@test.com' });
+    expect(mockService.update).toHaveBeenCalledWith(1, {
+      name: 'Alan',
+      email: 'alan@test.com',
+    });
+  });
+
+  it('remove should return the removed user', async () => {
+    const user = await controller.remove(1);
+    expect(user).toEqual(mockUser);
+    expect(mockService.remove).toHaveBeenCalledWith(1);
   });
 });
