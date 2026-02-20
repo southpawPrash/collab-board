@@ -14,7 +14,7 @@ describe('UsersController', () => {
     findOne: jest.fn().mockResolvedValue(mockUser),
     create: jest.fn().mockResolvedValue(mockUser),
     update: jest.fn((id: number, fields: UpdateUserDto): User => {
-      return { ...mockUser, ...fields };
+      return { ...mockUser, ...fields } as User;
     }),
     remove: jest.fn().mockResolvedValue(mockUser),
   };
@@ -49,11 +49,16 @@ describe('UsersController', () => {
 
   it('create should return the created user', async () => {
     expect(
-      await controller.create({ name: 'Alice', email: 'alice@test.com' }),
+      await controller.create({
+        name: 'Alice',
+        email: 'alice@test.com',
+        password: '123456',
+      }),
     ).toEqual(mockUser);
     expect(mockService.create).toHaveBeenCalledWith({
       name: 'Alice',
       email: 'alice@test.com',
+      password: '123456',
     });
   });
 
