@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +15,13 @@ async function bootstrap() {
       transform: true, // auto-transform types
     }),
   );
+
+  app.enableCors({
+    origin: 'http://localhost:3001', // frontend URL
+    credentials: true,
+  });
+
+  app.use(cookieParser());
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 3000;
